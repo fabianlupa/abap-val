@@ -27,22 +27,25 @@ CLASS zcl_val_rules_ddic DEFINITION
       "! @parameter iv_check_fixed | Check against fixed values
       "! @parameter iv_check_table | Check against check database table
       "! @parameter rv_in_domain | Value is part of the domain
+      "! @raising zcx_val_illegal_argument | Domain does not exist
       is_value_in_domain IMPORTING iv_domname          TYPE domname
                                    iv_value            TYPE csequence
                                    iv_check_fixed      TYPE abap_bool
                                    iv_check_table      TYPE abap_bool
-                         RETURNING VALUE(rv_in_domain) TYPE abap_bool,
+                         RETURNING VALUE(rv_in_domain) TYPE abap_bool
+                         RAISING   zcx_val_illegal_argument,
       "! Check if a value is an entry in a database table
       "! @parameter iv_tabname | DB table name
       "! @parameter iv_value | Value to check
       "! @parameter iv_column | Column that should contain the value
-      "! @parameter io_descr |
       "! @parameter rv_in_table | Value is an entry in the database table
+      "! @raising zcx_val_illegal_argument | Table does not exist / is unsupported or column does
+      "!                                     not exist in table
       is_value_in_table IMPORTING iv_tabname         TYPE tabname
                                   iv_value           TYPE csequence
-                                  iv_column          TYPE fieldname OPTIONAL
-                                  io_descr           TYPE REF TO cl_abap_structdescr OPTIONAL
-                        RETURNING VALUE(rv_in_table) TYPE abap_bool.
+                                  iv_column          TYPE fieldname
+                        RETURNING VALUE(rv_in_table) TYPE abap_bool
+                        RAISING   zcx_val_illegal_argument.
   PROTECTED SECTION.
     METHODS:
       validate_internal REDEFINITION.
@@ -54,6 +57,10 @@ CLASS zcl_val_rules_ddic DEFINITION
         domain TYPE gty_mode VALUE 'DOMAIN',
         table  TYPE gty_mode VALUE 'TABLE',
       END OF gc_modes.
+    CLASS-METHODS:
+      get_domain_column_name IMPORTING iv_domname       TYPE domname
+                                       iv_tabname       TYPE tabname
+                             RETURNING VALUE(rv_column) TYPE fieldname.
 ENDCLASS.
 
 
@@ -112,12 +119,15 @@ CLASS zcl_val_rules_ddic IMPLEMENTATION.
   METHOD is_value_in_domain.
     DATA: lt_values          TYPE STANDARD TABLE OF dd07v,
           lt_values_inactive TYPE STANDARD TABLE OF dd07v,
+          ls_header          TYPE dd01v,
           lt_value_range     TYPE RANGE OF domvalue.
 
     CALL FUNCTION 'DD_DOMA_GET'
       EXPORTING
         domain_name   = iv_domname
         withtext      = abap_false
+      IMPORTING
+        dd01v_wa_a    = ls_header
       TABLES
         dd07v_tab_a   = lt_values
         dd07v_tab_n   = lt_values_inactive
@@ -126,81 +136,111 @@ CLASS zcl_val_rules_ddic IMPLEMENTATION.
         op_failure    = 2
         OTHERS        = 3.
     IF sy-subrc <> 0.
-*     MESSAGE ID sy-msgid TYPE sy-msgty NUMBER sy-msgno
-*                WITH sy-msgv1 sy-msgv2 sy-msgv3 sy-msgv4.
+      MESSAGE ID sy-msgid TYPE sy-msgty NUMBER sy-msgno
+              WITH sy-msgv1 sy-msgv2 sy-msgv3 sy-msgv4
+              INTO DATA(lv_msg_text).
+      RAISE EXCEPTION TYPE zcx_val_illegal_argument
+        EXPORTING
+          iv_reason = lv_msg_text
+          iv_value  = iv_domname.
     ENDIF.
 
     LOOP AT lt_values ASSIGNING FIELD-SYMBOL(<ls_value>).
-      APPEND VALUE #( sign   = COND #( WHEN <ls_value>-domvalue_h IS NOT INITIAL
+      APPEND VALUE #( option = COND #( WHEN <ls_value>-domvalue_h IS NOT INITIAL
                                        THEN 'BT'
                                        ELSE 'EQ' )
                       low    = <ls_value>-domvalue_l
                       high   = <ls_value>-domvalue_h
-                      option = 'I' ) TO lt_value_range.
+                      sign   = 'I' ) TO lt_value_range.
     ENDLOOP.
 
     rv_in_domain = boolc(
-      iv_value IN lt_value_range OR
-      ( iv_check_table = abap_true AND
-        is_value_in_table( iv_tabname = 'TODO' iv_value = iv_value ) = abap_true )
+      ( iv_check_fixed = abap_true AND lt_value_range IS NOT INITIAL AND
+        iv_value IN lt_value_range )
+      OR
+      ( iv_check_table = abap_true AND ls_header-entitytab IS NOT INITIAL AND
+        is_value_in_table(
+          iv_tabname = ls_header-entitytab
+          iv_value   = iv_value
+          iv_column  = get_domain_column_name( iv_domname = iv_domname
+                                               iv_tabname = ls_header-entitytab )
+        ) = abap_true )
     ).
-
-    IF rv_in_domain = abap_false AND iv_check_table = abap_true.
-
-    ENDIF.
   ENDMETHOD.
 
   METHOD is_value_in_table.
     DATA: lv_objtype TYPE tabclass,
-          lr_struct  TYPE REF TO data,
-          lt_cond    TYPE stringtab.
-    FIELD-SYMBOLS: <lg_struct> TYPE any.
+          lt_cond    TYPE stringtab,
+          lt_fields  TYPE STANDARD TABLE OF x031l.
 
     CALL FUNCTION 'DDIF_NAMETAB_GET'
       EXPORTING
         tabname   = iv_tabname
       IMPORTING
         ddobjtype = lv_objtype
+      TABLES
+        x031l_tab = lt_fields
       EXCEPTIONS
         not_found = 1
         OTHERS    = 2.
-    IF sy-subrc <> 0 OR ( lv_objtype <> 'TRANSP' AND lv_objtype <> 'VIEW' ).
-*     MESSAGE ID sy-msgid TYPE sy-msgty NUMBER sy-msgno
-*                WITH sy-msgv1 sy-msgv2 sy-msgv3 sy-msgv4.
+
+    IF sy-subrc <> 0.
+      MESSAGE ID sy-msgid TYPE sy-msgty NUMBER sy-msgno
+              WITH sy-msgv1 sy-msgv2 sy-msgv3 sy-msgv4
+              INTO DATA(lv_msg_text).
+      RAISE EXCEPTION TYPE zcx_val_illegal_argument
+        EXPORTING
+          iv_reason = lv_msg_text
+          iv_value  = iv_tabname.
+
+    ELSEIF lv_objtype <> 'TRANSP' AND lv_objtype <> 'VIEW'.
+      RAISE EXCEPTION TYPE zcx_val_illegal_argument
+        EXPORTING
+          iv_reason = 'Table is not transparent table / view'
+          iv_value  = iv_tabname ##NO_TEXT.
+
+    ELSEIF NOT line_exists( lt_fields[ fieldname = iv_column ] ).
+      RAISE EXCEPTION TYPE zcx_val_illegal_argument
+        EXPORTING
+          iv_reason = 'Column does not exist in table'
+          iv_value  = iv_column ##NO_TEXT.
     ENDIF.
 
-    IF io_descr IS BOUND.
-      CREATE DATA lr_struct TYPE HANDLE io_descr.
-      ASSIGN lr_struct->* TO <lg_struct>.
-      <lg_struct> = iv_value.
+    APPEND |{ iv_column } = { cl_abap_dyn_prg=>quote( iv_value ) }| TO lt_cond.
 
-      LOOP AT io_descr->components ASSIGNING FIELD-SYMBOL(<ls_comp>).
-        ASSIGN COMPONENT <ls_comp>-name OF STRUCTURE <lg_struct> TO FIELD-SYMBOL(<lg_comp>).
-        APPEND |{ <ls_comp>-name } = '{ <lg_comp> }'| TO lt_cond.
-      ENDLOOP.
+    SELECT COUNT(*)
+      FROM (iv_tabname)
+      WHERE (lt_cond).
 
-      TRY.
-          SELECT COUNT(*)
-            FROM (iv_tabname)
-            WHERE (lt_cond).
-        CATCH cx_sy_dynamic_osql_error.
-          ASSERT 1 = 2 ##TODO.
-      ENDTRY.
+    rv_in_table = boolc( sy-dbcnt > 0 ).
+  ENDMETHOD.
 
-      rv_in_table = boolc( sy-dbcnt > 0 ).
+  METHOD get_domain_column_name.
+    DATA: lt_fields TYPE STANDARD TABLE OF dfies.
 
-    ELSE.
-      APPEND |{ iv_column } = '{ iv_value }'| TO lt_cond.
+    " This could propably be found out a lot faster
 
-      TRY.
-          SELECT COUNT(*)
-            FROM (iv_tabname)
-            WHERE (lt_cond).
-        CATCH cx_sy_dynamic_osql_error.
-          ASSERT 1 = 2 ##TODO.
-      ENDTRY.
+    CALL FUNCTION 'DDIF_NAMETAB_GET'
+      EXPORTING
+        tabname   = iv_tabname
+      TABLES
+        dfies_tab = lt_fields
+      EXCEPTIONS
+        not_found = 1
+        OTHERS    = 2.
+    ASSERT sy-subrc = 0.
 
-      rv_in_table = boolc( sy-dbcnt > 0 ).
-    ENDIF.
+    LOOP AT lt_fields ASSIGNING FIELD-SYMBOL(<ls_field>) WHERE keyflag = abap_true
+                                                           AND rollname IS NOT INITIAL.
+      DATA(lo_descr) = CAST cl_abap_elemdescr(
+                         cl_abap_typedescr=>describe_by_name( <ls_field>-rollname )
+                       ).
+      IF lo_descr->is_ddic_type( ) = abap_true AND lo_descr->get_ddic_field( )-domname = iv_domname.
+        rv_column = <ls_field>-fieldname.
+        EXIT.
+      ENDIF.
+    ENDLOOP.
+
+    ASSERT rv_column IS NOT INITIAL.
   ENDMETHOD.
 ENDCLASS.
