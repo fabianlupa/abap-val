@@ -38,7 +38,15 @@ CLASS zcx_val_unsupported_operation DEFINITION
         attr2 TYPE scx_attrname VALUE '',
         attr3 TYPE scx_attrname VALUE '',
         attr4 TYPE scx_attrname VALUE '',
-      END OF gc_not_self_validatable.
+      END OF gc_not_self_validatable,
+      BEGIN OF gc_no_domain,
+        msgid TYPE symsgid VALUE 'ZVAL',
+        msgno TYPE symsgno VALUE '015',
+        attr1 TYPE scx_attrname VALUE '',
+        attr2 TYPE scx_attrname VALUE '',
+        attr3 TYPE scx_attrname VALUE '',
+        attr4 TYPE scx_attrname VALUE '',
+      END OF gc_no_domain.
     INTERFACES:
       if_t100_message.
     METHODS:

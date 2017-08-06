@@ -12,15 +12,21 @@ CLASS zcl_val_rules_ddic DEFINITION
       "! @parameter iv_check_fixed | Check against fixed values
       "! @parameter iv_check_table | Check against check database table
       "! @parameter ro_config | Rule configration
+      "! @raising zcx_val_illegal_argument | Domain does not exist
       new_domain IMPORTING iv_domname       TYPE domname OPTIONAL
                            iv_check_fixed   TYPE abap_bool DEFAULT abap_true
                            iv_check_table   TYPE abap_bool DEFAULT abap_true
-                 RETURNING VALUE(ro_config) TYPE REF TO zcl_val_rules_config,
+                 RETURNING VALUE(ro_config) TYPE REF TO zcl_val_rules_config
+                 RAISING   zcx_val_illegal_argument,
       "! Validate a data object against database table entries
       "! @parameter iv_tabname | DB table name
+      "! @parameter iv_column | Column name to search in
       "! @parameter ro_config | Rule configuration
+      "! @raising zcx_val_illegal_argument | Table or column does not exist
       new_table IMPORTING iv_tabname       TYPE tabname
-                RETURNING VALUE(ro_config) TYPE REF TO zcl_val_rules_config,
+                          iv_column        TYPE fieldname
+                RETURNING VALUE(ro_config) TYPE REF TO zcl_val_rules_config
+                RAISING   zcx_val_illegal_argument,
       "! Check if a value is part of a domain
       "! @parameter iv_domname | Domain name
       "! @parameter iv_value | Value to check
@@ -67,6 +73,42 @@ ENDCLASS.
 
 CLASS zcl_val_rules_ddic IMPLEMENTATION.
   METHOD new_domain.
+    DATA: ls_header          TYPE dd01v,
+          lt_values          TYPE STANDARD TABLE OF dd07v,
+          lt_values_inactive TYPE STANDARD TABLE OF dd07v.
+
+    IF iv_domname IS NOT INITIAL.
+      CALL FUNCTION 'DD_DOMA_GET'
+        EXPORTING
+          domain_name   = iv_domname
+          withtext      = abap_false
+        IMPORTING
+          dd01v_wa_a    = ls_header
+        TABLES
+          dd07v_tab_a   = lt_values
+          dd07v_tab_n   = lt_values_inactive
+        EXCEPTIONS
+          illegal_value = 1
+          op_failure    = 2
+          OTHERS        = 3.
+
+      IF sy-subrc <> 0.
+        MESSAGE ID sy-msgid TYPE sy-msgty NUMBER sy-msgno
+                WITH sy-msgv1 sy-msgv2 sy-msgv3 sy-msgv4
+                INTO DATA(lv_msg_text).
+        RAISE EXCEPTION TYPE zcx_val_illegal_argument
+          EXPORTING
+            iv_reason = lv_msg_text
+            iv_value  = iv_domname.
+
+      ELSEIF ls_header IS INITIAL.
+        RAISE EXCEPTION TYPE zcx_val_illegal_argument
+          EXPORTING
+            iv_reason = 'Domain could not be found'
+            iv_value  = iv_domname ##NO_TEXT.
+      ENDIF.
+    ENDIF.
+
     ro_config = NEW lcl_config( iv_mode        = gc_modes-domain
                                 iv_domname     = iv_domname
                                 iv_check_fixed = iv_check_fixed
@@ -74,8 +116,36 @@ CLASS zcl_val_rules_ddic IMPLEMENTATION.
   ENDMETHOD.
 
   METHOD new_table.
+    DATA: lt_fields TYPE STANDARD TABLE OF dfies.
+
+    CALL FUNCTION 'DDIF_NAMETAB_GET'
+      EXPORTING
+        tabname   = iv_tabname
+      TABLES
+        dfies_tab = lt_fields
+      EXCEPTIONS
+        not_found = 1
+        OTHERS    = 2.
+
+    IF sy-subrc <> 0.
+      MESSAGE ID sy-msgid TYPE sy-msgty NUMBER sy-msgno
+              WITH sy-msgv1 sy-msgv2 sy-msgv3 sy-msgv4
+              INTO DATA(lv_msg_text).
+      RAISE EXCEPTION TYPE zcx_val_illegal_argument
+        EXPORTING
+          iv_reason = lv_msg_text
+          iv_value  = iv_tabname.
+
+    ELSEIF NOT line_exists( lt_fields[ fieldname = iv_column ] ).
+      RAISE EXCEPTION TYPE zcx_val_illegal_argument
+        EXPORTING
+          iv_reason = 'Column does not exist in database table'
+          iv_value  = iv_column ##NO_TEXT.
+    ENDIF.
+
     ro_config = NEW lcl_config( iv_mode    = gc_modes-table
-                                iv_tabname = iv_tabname ).
+                                iv_tabname = iv_tabname
+                                iv_column  = iv_column ).
   ENDMETHOD.
 
   METHOD validate_internal.
@@ -95,12 +165,16 @@ CLASS zcl_val_rules_ddic IMPLEMENTATION.
         ELSE.
           DATA(lo_descr) = cl_abap_typedescr=>describe_by_data_ref( ir_ref ).
           IF lo_descr->kind <> cl_abap_typedescr=>kind_elem.
-
+            RAISE EXCEPTION TYPE zcx_val_unsupported_operation
+              EXPORTING
+                is_textid = zcx_val_unsupported_operation=>gc_no_domain.
           ENDIF.
 
           DATA(lo_elem_descr) = CAST cl_abap_elemdescr( lo_descr ).
           IF lo_elem_descr->is_ddic_type( ) = abap_false.
-
+            RAISE EXCEPTION TYPE zcx_val_unsupported_operation
+              EXPORTING
+                is_textid = zcx_val_unsupported_operation=>gc_no_domain.
           ENDIF.
 
           lv_domname = lo_elem_descr->get_ddic_field( )-domname.
@@ -111,9 +185,43 @@ CLASS zcl_val_rules_ddic IMPLEMENTATION.
                                        iv_check_fixed = lo_config->mv_check_fixed
                                        iv_check_table = lo_config->mv_check_table ).
 
+      WHEN gc_modes-table.
+        rv_valid = is_value_in_table( iv_tabname = lo_config->mv_tabname
+                                      iv_value   = lv_string
+                                      iv_column  = lo_config->mv_column ).
+
       WHEN OTHERS.
         ASSERT 1 = 2.
     ENDCASE.
+  ENDMETHOD.
+
+  METHOD get_domain_column_name.
+    DATA: lt_fields TYPE STANDARD TABLE OF dfies.
+
+    " This could propably be found out a lot faster
+
+    CALL FUNCTION 'DDIF_NAMETAB_GET'
+      EXPORTING
+        tabname   = iv_tabname
+      TABLES
+        dfies_tab = lt_fields
+      EXCEPTIONS
+        not_found = 1
+        OTHERS    = 2.
+    ASSERT sy-subrc = 0.
+
+    LOOP AT lt_fields ASSIGNING FIELD-SYMBOL(<ls_field>) WHERE keyflag = abap_true
+                                                           AND rollname IS NOT INITIAL.
+      DATA(lo_descr) = CAST cl_abap_elemdescr(
+                         cl_abap_typedescr=>describe_by_name( <ls_field>-rollname )
+                       ).
+      IF lo_descr->is_ddic_type( ) = abap_true AND lo_descr->get_ddic_field( )-domname = iv_domname.
+        rv_column = <ls_field>-fieldname.
+        EXIT.
+      ENDIF.
+    ENDLOOP.
+
+    ASSERT rv_column IS NOT INITIAL.
   ENDMETHOD.
 
   METHOD is_value_in_domain.
@@ -135,6 +243,7 @@ CLASS zcl_val_rules_ddic IMPLEMENTATION.
         illegal_value = 1
         op_failure    = 2
         OTHERS        = 3.
+
     IF sy-subrc <> 0.
       MESSAGE ID sy-msgid TYPE sy-msgty NUMBER sy-msgno
               WITH sy-msgv1 sy-msgv2 sy-msgv3 sy-msgv4
@@ -143,6 +252,12 @@ CLASS zcl_val_rules_ddic IMPLEMENTATION.
         EXPORTING
           iv_reason = lv_msg_text
           iv_value  = iv_domname.
+
+    ELSEIF ls_header IS INITIAL.
+      RAISE EXCEPTION TYPE zcx_val_illegal_argument
+        EXPORTING
+          iv_reason = 'Domain could not be found'
+          iv_value  = iv_domname ##NO_TEXT.
     ENDIF.
 
     LOOP AT lt_values ASSIGNING FIELD-SYMBOL(<ls_value>).
@@ -213,34 +328,5 @@ CLASS zcl_val_rules_ddic IMPLEMENTATION.
       WHERE (lt_cond).
 
     rv_in_table = boolc( sy-dbcnt > 0 ).
-  ENDMETHOD.
-
-  METHOD get_domain_column_name.
-    DATA: lt_fields TYPE STANDARD TABLE OF dfies.
-
-    " This could propably be found out a lot faster
-
-    CALL FUNCTION 'DDIF_NAMETAB_GET'
-      EXPORTING
-        tabname   = iv_tabname
-      TABLES
-        dfies_tab = lt_fields
-      EXCEPTIONS
-        not_found = 1
-        OTHERS    = 2.
-    ASSERT sy-subrc = 0.
-
-    LOOP AT lt_fields ASSIGNING FIELD-SYMBOL(<ls_field>) WHERE keyflag = abap_true
-                                                           AND rollname IS NOT INITIAL.
-      DATA(lo_descr) = CAST cl_abap_elemdescr(
-                         cl_abap_typedescr=>describe_by_name( <ls_field>-rollname )
-                       ).
-      IF lo_descr->is_ddic_type( ) = abap_true AND lo_descr->get_ddic_field( )-domname = iv_domname.
-        rv_column = <ls_field>-fieldname.
-        EXIT.
-      ENDIF.
-    ENDLOOP.
-
-    ASSERT rv_column IS NOT INITIAL.
   ENDMETHOD.
 ENDCLASS.
