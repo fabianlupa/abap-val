@@ -146,6 +146,12 @@
      <MSGNR>022</MSGNR>
      <TEXT>&apos;&amp;1&apos; does not match the pattern &apos;&amp;3&apos;.</TEXT>
     </T100>
+    <T100>
+     <SPRSL>E</SPRSL>
+     <ARBGB>ZVAL</ARBGB>
+     <MSGNR>023</MSGNR>
+     <TEXT>Domain name could not be determined.</TEXT>
+    </T100>
    </T100>
   </asx:values>
  </asx:abap>
