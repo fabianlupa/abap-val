@@ -1,0 +1,158 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<abapGit version="v1.0.0" serializer="LCL_OBJECT_MSAG" serializer_version="v1.0.0">
+ <asx:abap xmlns:asx="http://www.sap.com/abapxml" version="1.0">
+  <asx:values>
+   <T100A>
+    <ARBGB>ZVAL</ARBGB>
+    <MASTERLANG>E</MASTERLANG>
+    <STEXT>Messages for ZVAL</STEXT>
+   </T100A>
+   <T100>
+    <T100>
+     <SPRSL>E</SPRSL>
+     <ARBGB>ZVAL</ARBGB>
+     <MSGNR>000</MSGNR>
+     <TEXT>&amp;</TEXT>
+    </T100>
+    <T100>
+     <SPRSL>E</SPRSL>
+     <ARBGB>ZVAL</ARBGB>
+     <MSGNR>001</MSGNR>
+     <TEXT>&amp; &amp;</TEXT>
+    </T100>
+    <T100>
+     <SPRSL>E</SPRSL>
+     <ARBGB>ZVAL</ARBGB>
+     <MSGNR>002</MSGNR>
+     <TEXT>&amp; &amp; &amp;</TEXT>
+    </T100>
+    <T100>
+     <SPRSL>E</SPRSL>
+     <ARBGB>ZVAL</ARBGB>
+     <MSGNR>003</MSGNR>
+     <TEXT>&amp; &amp; &amp; &amp;</TEXT>
+    </T100>
+    <T100>
+     <SPRSL>E</SPRSL>
+     <ARBGB>ZVAL</ARBGB>
+     <MSGNR>004</MSGNR>
+     <TEXT>Data object is invalid.</TEXT>
+    </T100>
+    <T100>
+     <SPRSL>E</SPRSL>
+     <ARBGB>ZVAL</ARBGB>
+     <MSGNR>005</MSGNR>
+     <TEXT>&apos;&amp;1&apos; has length &amp;2, minimal length is &amp;3.</TEXT>
+    </T100>
+    <T100>
+     <SPRSL>E</SPRSL>
+     <ARBGB>ZVAL</ARBGB>
+     <MSGNR>006</MSGNR>
+     <TEXT>&apos;&amp;1&apos; has length &amp;2, maximal length is &amp;3.</TEXT>
+    </T100>
+    <T100>
+     <SPRSL>E</SPRSL>
+     <ARBGB>ZVAL</ARBGB>
+     <MSGNR>007</MSGNR>
+     <TEXT>Unsupported operation</TEXT>
+    </T100>
+    <T100>
+     <SPRSL>E</SPRSL>
+     <ARBGB>ZVAL</ARBGB>
+     <MSGNR>008</MSGNR>
+     <TEXT>Vali. of non-character-like data objects is not supported by this rule.</TEXT>
+    </T100>
+    <T100>
+     <SPRSL>E</SPRSL>
+     <ARBGB>ZVAL</ARBGB>
+     <MSGNR>009</MSGNR>
+     <TEXT>Vali. of non object reference data objects is not supported by this rule.</TEXT>
+    </T100>
+    <T100>
+     <SPRSL>E</SPRSL>
+     <ARBGB>ZVAL</ARBGB>
+     <MSGNR>010</MSGNR>
+     <TEXT>Argument cannot be null.</TEXT>
+    </T100>
+    <T100>
+     <SPRSL>E</SPRSL>
+     <ARBGB>ZVAL</ARBGB>
+     <MSGNR>011</MSGNR>
+     <TEXT>Argument &apos;&amp;1&apos; cannot be null.</TEXT>
+    </T100>
+    <T100>
+     <SPRSL>E</SPRSL>
+     <ARBGB>ZVAL</ARBGB>
+     <MSGNR>012</MSGNR>
+     <TEXT>Illegal argument</TEXT>
+    </T100>
+    <T100>
+     <SPRSL>E</SPRSL>
+     <ARBGB>ZVAL</ARBGB>
+     <MSGNR>013</MSGNR>
+     <TEXT>Illegal argument: &amp;1</TEXT>
+    </T100>
+    <T100>
+     <SPRSL>E</SPRSL>
+     <ARBGB>ZVAL</ARBGB>
+     <MSGNR>014</MSGNR>
+     <TEXT>The object to validate is not self validatable.</TEXT>
+    </T100>
+    <T100>
+     <SPRSL>E</SPRSL>
+     <ARBGB>ZVAL</ARBGB>
+     <MSGNR>015</MSGNR>
+     <TEXT>&apos;&amp;1&apos; is initial.</TEXT>
+    </T100>
+    <T100>
+     <SPRSL>E</SPRSL>
+     <ARBGB>ZVAL</ARBGB>
+     <MSGNR>016</MSGNR>
+     <TEXT>&apos;&amp;1&apos; is not initial.</TEXT>
+    </T100>
+    <T100>
+     <SPRSL>E</SPRSL>
+     <ARBGB>ZVAL</ARBGB>
+     <MSGNR>017</MSGNR>
+     <TEXT>&apos;&amp;1&apos; is not bound.</TEXT>
+    </T100>
+    <T100>
+     <SPRSL>E</SPRSL>
+     <ARBGB>ZVAL</ARBGB>
+     <MSGNR>018</MSGNR>
+     <TEXT>&apos;&amp;1&apos; is bound.</TEXT>
+    </T100>
+    <T100>
+     <SPRSL>E</SPRSL>
+     <ARBGB>ZVAL</ARBGB>
+     <MSGNR>019</MSGNR>
+     <TEXT>&apos;&amp;1&apos; is not contained in range.</TEXT>
+    </T100>
+    <T100>
+     <SPRSL>E</SPRSL>
+     <ARBGB>ZVAL</ARBGB>
+     <MSGNR>020</MSGNR>
+     <TEXT>&apos;&amp;1&apos; is contained in range.</TEXT>
+    </T100>
+    <T100>
+     <SPRSL>E</SPRSL>
+     <ARBGB>ZVAL</ARBGB>
+     <MSGNR>021</MSGNR>
+     <TEXT>Null reference cannot be validated.</TEXT>
+    </T100>
+    <T100>
+     <SPRSL>E</SPRSL>
+     <ARBGB>ZVAL</ARBGB>
+     <MSGNR>022</MSGNR>
+     <TEXT>&apos;&amp;1&apos; does not match the pattern &apos;&amp;3&apos;.</TEXT>
+    </T100>
+    <T100>
+     <SPRSL>E</SPRSL>
+     <ARBGB>ZVAL</ARBGB>
+     <MSGNR>023</MSGNR>
+     <TEXT>Domain name could not be determined.</TEXT>
+    </T100>
+   </T100>
+  </asx:values>
+ </asx:abap>
+</abapGit>

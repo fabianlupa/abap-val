@@ -1,0 +1,30 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<abapGit version="v1.0.0" serializer="LCL_OBJECT_PINF" serializer_version="v1.0.0">
+ <asx:abap xmlns:asx="http://www.sap.com/abapxml" version="1.0">
+  <asx:values>
+   <PINF>
+    <ATTRIBUTES>
+     <INTF_NAME>ZVAL_CORE_INTERNAL</INTF_NAME>
+     <DESCRIPT>ZVAL_CORE internal</DESCRIPT>
+    </ATTRIBUTES>
+    <ELEMENTS>
+     <SCOMELDTLN>
+      <INTF_NAME>ZVAL_CORE_INTERNAL</INTF_NAME>
+      <ELEM_TYPE>CLAS</ELEM_TYPE>
+      <ELEM_KEY>ZCL_VAL_TOOLS</ELEM_KEY>
+     </SCOMELDTLN>
+     <SCOMELDTLN>
+      <INTF_NAME>ZVAL_CORE_INTERNAL</INTF_NAME>
+      <ELEM_TYPE>MSAG</ELEM_TYPE>
+      <ELEM_KEY>ZVAL</ELEM_KEY>
+     </SCOMELDTLN>
+     <SCOMELDTLN>
+      <INTF_NAME>ZVAL_CORE_INTERNAL</INTF_NAME>
+      <ELEM_TYPE>PINF</ELEM_TYPE>
+      <ELEM_KEY>ZVAL_CORE</ELEM_KEY>
+     </SCOMELDTLN>
+    </ELEMENTS>
+   </PINF>
+  </asx:values>
+ </asx:abap>
+</abapGit>
