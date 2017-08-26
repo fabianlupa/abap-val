@@ -5,5 +5,5 @@ INTERFACE zif_val_os_check PUBLIC.
   ALIASES:
     is_consistent FOR if_os_check~is_consistent.
   DATA:
-    mx_last_validation_error TYPE REF TO zcx_val_invalid.
+    mx_last_validation_error TYPE REF TO zcx_val_invalid READ-ONLY.
 ENDINTERFACE.
