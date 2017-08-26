@@ -18,6 +18,27 @@
      <ENTRY>Persistent class example</ENTRY>
      <LENGTH>24</LENGTH>
     </item>
+    <item>
+     <ID>S</ID>
+     <KEY>P_FNAM</KEY>
+     <ENTRY>.</ENTRY>
+     <LENGTH>9</LENGTH>
+     <SPLIT>D</SPLIT>
+    </item>
+    <item>
+     <ID>S</ID>
+     <KEY>P_LNAM</KEY>
+     <ENTRY>.</ENTRY>
+     <LENGTH>9</LENGTH>
+     <SPLIT>D</SPLIT>
+    </item>
+    <item>
+     <ID>S</ID>
+     <KEY>P_USR</KEY>
+     <ENTRY>.</ENTRY>
+     <LENGTH>9</LENGTH>
+     <SPLIT>D</SPLIT>
+    </item>
    </TPOOL>
   </asx:values>
  </asx:abap>

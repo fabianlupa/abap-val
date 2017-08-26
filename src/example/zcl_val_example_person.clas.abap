@@ -9,37 +9,38 @@ public section.
 
   interfaces IF_OS_STATE .
   interfaces IF_OS_CHECK .
+  interfaces ZIF_VAL_OS_CHECK .
 
-  methods GET_MV_FIRSTNAME
+  methods GET_FIRSTNAME
     returning
       value(RESULT) type BU_NAMEP_F
     raising
       CX_OS_OBJECT_NOT_FOUND .
-  methods GET_MV_LASTNAME
+  methods GET_LASTNAME
     returning
       value(RESULT) type BU_NAMEP_L
     raising
       CX_OS_OBJECT_NOT_FOUND .
-  methods GET_MV_UNAME
+  methods GET_UNAME
     returning
       value(RESULT) type UNAME
     raising
       CX_OS_OBJECT_NOT_FOUND .
-  methods SET_MV_FIRSTNAME
+  methods SET_FIRSTNAME
     importing
-      !I_MV_FIRSTNAME type BU_NAMEP_F
+      !I_FIRSTNAME type BU_NAMEP_F
     raising
       CX_OS_OBJECT_NOT_FOUND .
-  methods SET_MV_LASTNAME
+  methods SET_LASTNAME
     importing
-      !I_MV_LASTNAME type BU_NAMEP_L
+      !I_LASTNAME type BU_NAMEP_L
     raising
       CX_OS_OBJECT_NOT_FOUND .
 protected section.
 
-  data MV_UNAME type UNAME .
-  data MV_FIRSTNAME type BU_NAMEP_F .
-  data MV_LASTNAME type BU_NAMEP_L .
+  data UNAME type UNAME .
+  data FIRSTNAME type BU_NAMEP_F .
+  data LASTNAME type BU_NAMEP_L .
 private section.
 ENDCLASS.
 
@@ -48,12 +49,12 @@ ENDCLASS.
 CLASS ZCL_VAL_EXAMPLE_PERSON IMPLEMENTATION.
 
 
-  method GET_MV_FIRSTNAME.
+  method GET_FIRSTNAME.
 ***BUILD 090501
      " returning RESULT
      " raising CX_OS_OBJECT_NOT_FOUND
 ************************************************************************
-* Purpose        : Get Attribute MV_FIRSTNAME
+* Purpose        : Get Attribute FIRSTNAME
 *
 * Version        : 2.0
 *
@@ -74,18 +75,18 @@ CLASS ZCL_VAL_EXAMPLE_PERSON IMPLEMENTATION.
 * * Inform class agent and handle exceptions
   state_read_access.
 
-  result = MV_FIRSTNAME.
+  result = FIRSTNAME.
 
-           " GET_MV_FIRSTNAME
+           " GET_FIRSTNAME
   endmethod.
 
 
-  method GET_MV_LASTNAME.
+  method GET_LASTNAME.
 ***BUILD 090501
      " returning RESULT
      " raising CX_OS_OBJECT_NOT_FOUND
 ************************************************************************
-* Purpose        : Get Attribute MV_LASTNAME
+* Purpose        : Get Attribute LASTNAME
 *
 * Version        : 2.0
 *
@@ -106,18 +107,18 @@ CLASS ZCL_VAL_EXAMPLE_PERSON IMPLEMENTATION.
 * * Inform class agent and handle exceptions
   state_read_access.
 
-  result = MV_LASTNAME.
+  result = LASTNAME.
 
-           " GET_MV_LASTNAME
+           " GET_LASTNAME
   endmethod.
 
 
-  method GET_MV_UNAME.
+  method GET_UNAME.
 ***BUILD 090501
      " returning RESULT
      " raising CX_OS_OBJECT_NOT_FOUND
 ************************************************************************
-* Purpose        : Get Attribute MV_UNAME
+* Purpose        : Get Attribute UNAME
 *
 * Version        : 2.0
 *
@@ -138,23 +139,29 @@ CLASS ZCL_VAL_EXAMPLE_PERSON IMPLEMENTATION.
 * * Inform class agent and handle exceptions
   state_read_access.
 
-  result = MV_UNAME.
+  result = UNAME.
 
-           " GET_MV_UNAME
+           " GET_UNAME
   endmethod.
 
 
   METHOD if_os_check~is_consistent.
     DATA(lt_rules) = zcl_val_configuration_builder=>get(
-      )->add_field( REF #( mv_firstname )
+      )->add_field( REF #( firstname )
         )->add_rule( zcl_val_rules_abap=>new_not_initial( )
         )->end(
-      )->add_field( REF #( mv_lastname )
+      )->add_field( REF #( lastname )
         )->add_rule( zcl_val_rules_abap=>new_not_initial( )
         )->end(
       )->build(
     ).
-    result = zcl_val_validator=>validate_all( lt_rules ).
+    TRY.
+        zcl_val_validator=>check_valid_all( lt_rules ).
+        result = oscon_true.
+      CATCH zcx_val_invalid INTO DATA(lx_ex).
+        result = oscon_false.
+        zif_val_os_check~mx_last_validation_error = lx_ex.
+    ENDTRY.
   ENDMETHOD.
 
 
@@ -227,9 +234,9 @@ CLASS ZCL_VAL_EXAMPLE_PERSON IMPLEMENTATION.
   endmethod.
 
 
-  method IF_OS_STATE~INIT.
+  METHOD if_os_state~init.
 ***BUILD 090501
-"#EC NEEDED
+                                                            "#EC NEEDED
 ************************************************************************
 * Purpose        : Initialisation of the transient state partition.
 *
@@ -249,8 +256,8 @@ CLASS ZCL_VAL_EXAMPLE_PERSON IMPLEMENTATION.
 ************************************************************************
 * Modify if you like
 ************************************************************************
-
-  endmethod.
+    cl_os_system=>get_transaction_manager( )->get_current_transaction( )->register_check_agent( me ).
+  ENDMETHOD.
 
 
   method IF_OS_STATE~INVALIDATE.
@@ -311,12 +318,12 @@ CLASS ZCL_VAL_EXAMPLE_PERSON IMPLEMENTATION.
   endmethod.
 
 
-  method SET_MV_FIRSTNAME.
+  method SET_FIRSTNAME.
 ***BUILD 090501
-     " importing I_MV_FIRSTNAME
+     " importing I_FIRSTNAME
      " raising CX_OS_OBJECT_NOT_FOUND
 ************************************************************************
-* Purpose        : Set attribute MV_FIRSTNAME
+* Purpose        : Set attribute FIRSTNAME
 *
 * Version        : 2.0
 *
@@ -338,25 +345,25 @@ CLASS ZCL_VAL_EXAMPLE_PERSON IMPLEMENTATION.
 * * Inform class agent and handle exceptions
   state_write_access.
 
-  if ( I_MV_FIRSTNAME <> MV_FIRSTNAME ).
+  if ( I_FIRSTNAME <> FIRSTNAME ).
 
-    MV_FIRSTNAME = I_MV_FIRSTNAME.
+    FIRSTNAME = I_FIRSTNAME.
 
 *   * Inform class agent and handle exceptions
     state_changed.
 
-  endif. "( I_MV_FIRSTNAME <> MV_FIRSTNAME )
+  endif. "( I_FIRSTNAME <> FIRSTNAME )
 
-           " GET_MV_FIRSTNAME
+           " GET_FIRSTNAME
   endmethod.
 
 
-  method SET_MV_LASTNAME.
+  method SET_LASTNAME.
 ***BUILD 090501
-     " importing I_MV_LASTNAME
+     " importing I_LASTNAME
      " raising CX_OS_OBJECT_NOT_FOUND
 ************************************************************************
-* Purpose        : Set attribute MV_LASTNAME
+* Purpose        : Set attribute LASTNAME
 *
 * Version        : 2.0
 *
@@ -378,15 +385,15 @@ CLASS ZCL_VAL_EXAMPLE_PERSON IMPLEMENTATION.
 * * Inform class agent and handle exceptions
   state_write_access.
 
-  if ( I_MV_LASTNAME <> MV_LASTNAME ).
+  if ( I_LASTNAME <> LASTNAME ).
 
-    MV_LASTNAME = I_MV_LASTNAME.
+    LASTNAME = I_LASTNAME.
 
 *   * Inform class agent and handle exceptions
     state_changed.
 
-  endif. "( I_MV_LASTNAME <> MV_LASTNAME )
+  endif. "( I_LASTNAME <> LASTNAME )
 
-           " GET_MV_LASTNAME
+           " GET_LASTNAME
   endmethod.
 ENDCLASS.

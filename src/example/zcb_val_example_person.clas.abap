@@ -8,33 +8,33 @@ public section.
 
   methods CREATE_PERSISTENT
     importing
-      !I_MV_UNAME type UNAME
+      !I_UNAME type UNAME
     returning
       value(RESULT) type ref to ZCL_VAL_EXAMPLE_PERSON
     raising
       CX_OS_OBJECT_EXISTING .
   methods CREATE_TRANSIENT
     importing
-      !I_MV_UNAME type UNAME
+      !I_UNAME type UNAME
     returning
       value(RESULT) type ref to ZCL_VAL_EXAMPLE_PERSON
     raising
       CX_OS_OBJECT_EXISTING .
   methods DELETE_PERSISTENT
     importing
-      !I_MV_UNAME type UNAME
+      !I_UNAME type UNAME
     raising
       CX_OS_OBJECT_NOT_EXISTING .
   methods GET_PERSISTENT
     importing
-      !I_MV_UNAME type UNAME
+      !I_UNAME type UNAME
     returning
       value(RESULT) type ref to ZCL_VAL_EXAMPLE_PERSON
     raising
       CX_OS_OBJECT_NOT_FOUND .
   methods GET_TRANSIENT
     importing
-      !I_MV_UNAME type UNAME
+      !I_UNAME type UNAME
     returning
       value(RESULT) type ref to ZCL_VAL_EXAMPLE_PERSON
     raising
@@ -59,16 +59,16 @@ protected section.
   types TYP_OBJECT_REF type ref to ZCL_VAL_EXAMPLE_PERSON .
   types:
     begin of TYP_BUSINESS_KEY ,
-      MV_UNAME type UNAME ,
+      UNAME type UNAME ,
     end of TYP_BUSINESS_KEY .
   types:
     TYP_BUSINESS_KEY_TAB type standard table of
       TYP_BUSINESS_KEY with non-unique default key .
   types:
     begin of TYP_DB_DATA ,
-      MV_UNAME type UNAME ,
-      MV_FIRSTNAME type BU_NAMEP_F ,
-      MV_LASTNAME type BU_NAMEP_L ,
+      UNAME type UNAME ,
+      FIRSTNAME type BU_NAMEP_F ,
+      LASTNAME type BU_NAMEP_L ,
     end of TYP_DB_DATA .
   types:
     TYP_DB_DATA_TAB type standard table of
@@ -178,7 +178,7 @@ CLASS ZCB_VAL_EXAMPLE_PERSON IMPLEMENTATION.
 
   method CREATE_PERSISTENT.
 ***BUILD 093901
-*      IMPORTING I_MV_UNAME TYPE UNAME
+*      IMPORTING I_UNAME TYPE UNAME
 *      RETURNING RESULT TYPE REF TO ZCL_VAL_EXAMPLE_PERSON
 ************************************************************************
 * Purpose        : Create a new persistent object identified by the
@@ -226,7 +226,7 @@ CLASS ZCB_VAL_EXAMPLE_PERSON IMPLEMENTATION.
   clear CURRENT_OBJECT_IREF.
 
 *< Generated from mapping:
-  BUSINESS_KEY-MV_UNAME = I_MV_UNAME.
+  BUSINESS_KEY-UNAME = I_UNAME.
 *>
 
 * * 1. Check if there is already an object with this key
@@ -256,7 +256,7 @@ CLASS ZCB_VAL_EXAMPLE_PERSON IMPLEMENTATION.
       try.
 
 *<  Generated from mapping:
-          THE_OBJECT->MV_UNAME = I_MV_UNAME.
+          THE_OBJECT->UNAME = I_UNAME.
 *>
 
           call method OS_PM_HANDLE_CREATE_ON_EXIST
@@ -322,7 +322,7 @@ CLASS ZCB_VAL_EXAMPLE_PERSON IMPLEMENTATION.
 
   method CREATE_TRANSIENT.
 ***BUILD 093901
-*      IMPORTING I_MV_UNAME TYPE UNAME
+*      IMPORTING I_UNAME TYPE UNAME
 *      RETURNING RESULT TYPE REF TO ZCL_VAL_EXAMPLE_PERSON
 ************************************************************************
 * Purpose        : Create a new transient object identified by the
@@ -368,7 +368,7 @@ CLASS ZCB_VAL_EXAMPLE_PERSON IMPLEMENTATION.
   clear CURRENT_OBJECT_IREF.
 
 *< Generated from mapping:
-  BUSINESS_KEY-MV_UNAME = I_MV_UNAME.
+  BUSINESS_KEY-UNAME = I_UNAME.
 *>
 
 * * 1. Check if there is already an object with the same key
@@ -399,7 +399,7 @@ CLASS ZCB_VAL_EXAMPLE_PERSON IMPLEMENTATION.
       try.
 
 *<  Generated from mapping:
-          THE_OBJECT->MV_UNAME = I_MV_UNAME.
+          THE_OBJECT->UNAME = I_UNAME.
 *>
 
           call method OS_PM_HANDLE_CREATE_ON_EXIST
@@ -465,7 +465,7 @@ CLASS ZCB_VAL_EXAMPLE_PERSON IMPLEMENTATION.
 
   method DELETE_PERSISTENT.
 ***BUILD 093901
-*      IMPORTING I_MV_UNAME TYPE UNAME.
+*      IMPORTING I_UNAME TYPE UNAME.
 *      raising   CX_OS_OBJECT_NOT_EXISTING
 ************************************************************************
 * Purpose        : Delete persistent object. It is marked DELETED in
@@ -510,7 +510,7 @@ CLASS ZCB_VAL_EXAMPLE_PERSON IMPLEMENTATION.
          CURRENT_SPECIAL_OBJECT_INFO.
 
 *< Generated from mapping:
-  BUSINESS_KEY-MV_UNAME = I_MV_UNAME.
+  BUSINESS_KEY-UNAME = I_UNAME.
 *>
 
   read table SPECIAL_BKEY_TAB into CURRENT_SPECIAL_OBJECT_INFO
@@ -636,7 +636,7 @@ CLASS ZCB_VAL_EXAMPLE_PERSON IMPLEMENTATION.
 
   method GET_PERSISTENT.
 ***BUILD 093901
-*      importing I_MV_UNAME TYPE UNAME.
+*      importing I_UNAME TYPE UNAME.
 *      returning RESULT TYPE REF TO ZCL_VAL_EXAMPLE_PERSON
 *       raising   CX_OS_OBJECT_NOT_FOUND
 ************************************************************************
@@ -684,7 +684,7 @@ CLASS ZCB_VAL_EXAMPLE_PERSON IMPLEMENTATION.
   clear:  CURRENT_OBJECT_IREF.
 
 *< Generated from mapping:
-  BUSINESS_KEY-MV_UNAME = I_MV_UNAME.
+  BUSINESS_KEY-UNAME = I_UNAME.
 *>
 
   read table SPECIAL_BKEY_TAB into CURRENT_SPECIAL_OBJECT_INFO
@@ -804,7 +804,7 @@ CLASS ZCB_VAL_EXAMPLE_PERSON IMPLEMENTATION.
 
   method GET_TRANSIENT.
 ***BUILD 093901
-*      IMPORTING I_MV_UNAME TYPE UNAME.
+*      IMPORTING I_UNAME TYPE UNAME.
 *      RETURNING RESULT TYPE REF TO ZCL_VAL_EXAMPLE_PERSON
 *       raising   CX_OS_OBJECT_NOT_FOUND
 ************************************************************************
@@ -844,7 +844,7 @@ CLASS ZCB_VAL_EXAMPLE_PERSON IMPLEMENTATION.
   clear CURRENT_OBJECT_IREF.
 
 *< Generated from mapping:
-  BUSINESS_KEY-MV_UNAME = I_MV_UNAME.
+  BUSINESS_KEY-UNAME = I_UNAME.
 *>
 
   read table SPECIAL_BKEY_TAB into CURRENT_SPECIAL_OBJECT_INFO
@@ -934,7 +934,7 @@ CLASS ZCB_VAL_EXAMPLE_PERSON IMPLEMENTATION.
 
 *< Generated from mapping:
   call method GET_PERSISTENT
-       exporting I_MV_UNAME = BUSINESS_KEY-MV_UNAME
+       exporting I_UNAME = BUSINESS_KEY-UNAME
        receiving RESULT = RESULT.
 *>
 
@@ -1420,7 +1420,7 @@ CLASS ZCB_VAL_EXAMPLE_PERSON IMPLEMENTATION.
 
 *< Generated from mapping:
   call method CREATE_PERSISTENT
-       exporting I_MV_UNAME = BUSINESS_KEY-MV_UNAME
+       exporting I_UNAME = BUSINESS_KEY-UNAME
        receiving RESULT = RESULT.
 *>
 
@@ -1457,7 +1457,7 @@ CLASS ZCB_VAL_EXAMPLE_PERSON IMPLEMENTATION.
 
 *< Generated from mapping:
   call method CREATE_TRANSIENT
-       exporting I_MV_UNAME = BUSINESS_KEY-MV_UNAME
+       exporting I_UNAME = BUSINESS_KEY-UNAME
        receiving RESULT = RESULT.
 *>
 
@@ -1521,7 +1521,7 @@ CLASS ZCB_VAL_EXAMPLE_PERSON IMPLEMENTATION.
 ************************************************************************
 
 *<Generated from mapping:
-  E_BUSINESS_KEY-MV_UNAME  = I_DB_DATA-MV_UNAME.
+  E_BUSINESS_KEY-UNAME  = I_DB_DATA-UNAME.
 *>
 
            "MAP_EXTRACT_IDENTIFIER
@@ -1573,9 +1573,9 @@ method MAP_GET_ATTRIBUTES.
     clear OBJECT_DATA_ITEM.
 
 *<  Generated from mapping:
-    OBJECT_DATA_ITEM-MV_UNAME = THE_OBJECT->MV_UNAME.
-    OBJECT_DATA_ITEM-MV_FIRSTNAME = THE_OBJECT->MV_FIRSTNAME.
-    OBJECT_DATA_ITEM-MV_LASTNAME = THE_OBJECT->MV_LASTNAME.
+    OBJECT_DATA_ITEM-UNAME = THE_OBJECT->UNAME.
+    OBJECT_DATA_ITEM-FIRSTNAME = THE_OBJECT->FIRSTNAME.
+    OBJECT_DATA_ITEM-LASTNAME = THE_OBJECT->LASTNAME.
 *>
 
     APPEND OBJECT_DATA_ITEM TO E_OBJECT_DATA_TAB.
@@ -1628,9 +1628,9 @@ endmethod.
       THE_OBJECT ?= OBJECT_IREF.
 
 *<    Generated from Mapping:
-      clear: THE_OBJECT->MV_UNAME,
-             THE_OBJECT->MV_FIRSTNAME,
-             THE_OBJECT->MV_LASTNAME.
+      clear: THE_OBJECT->UNAME,
+             THE_OBJECT->FIRSTNAME,
+             THE_OBJECT->LASTNAME.
 *>
 
     endif. "( not initial )
@@ -1699,7 +1699,7 @@ method MAP_LOAD_FROM_DATABASE_KEY.
   select * from ZVAL_TAEXPEOPLE
            into table DB_DATA_LOCAL_TAB
            for all entries in I_BUSINESS_KEY_TAB
-           where ZVAL_TAEXPEOPLE~UNAME = I_BUSINESS_KEY_TAB-MV_UNAME.
+           where ZVAL_TAEXPEOPLE~UNAME = I_BUSINESS_KEY_TAB-UNAME.
 *>
 
 * * error handling
@@ -1715,9 +1715,9 @@ method MAP_LOAD_FROM_DATABASE_KEY.
     assign <FS_DB_DATA_LOCAL> to <FS_DB_ZVAL_TAEXPEOPLE>.
 
 *< Generated from mapping:
-    DB_DATA-MV_UNAME = <FS_DB_ZVAL_TAEXPEOPLE>-UNAME.
-    DB_DATA-MV_FIRSTNAME = <FS_DB_ZVAL_TAEXPEOPLE>-FIRSTNAME.
-    DB_DATA-MV_LASTNAME = <FS_DB_ZVAL_TAEXPEOPLE>-LASTNAME.
+    DB_DATA-UNAME = <FS_DB_ZVAL_TAEXPEOPLE>-UNAME.
+    DB_DATA-FIRSTNAME = <FS_DB_ZVAL_TAEXPEOPLE>-FIRSTNAME.
+    DB_DATA-LASTNAME = <FS_DB_ZVAL_TAEXPEOPLE>-LASTNAME.
 *>
 
     append DB_DATA to RESULT.
@@ -1767,7 +1767,7 @@ endmethod.
          index SY-TABIX.
 
 *<  Generated from mapping:
-    <FS_OBJECT_DATA>-MV_UNAME = BUSINESS_KEY-MV_UNAME.
+    <FS_OBJECT_DATA>-UNAME = BUSINESS_KEY-UNAME.
 *>
 
 
@@ -1833,11 +1833,11 @@ endmethod.
 *< Generated from mapping:
 
 
-   DB_ILN_ZVAL_TAEXPEOPLE-FIRSTNAME = <FS_INSERT>-MV_FIRSTNAME.
-   DB_ILN_ZVAL_TAEXPEOPLE-LASTNAME = <FS_INSERT>-MV_LASTNAME.
+   DB_ILN_ZVAL_TAEXPEOPLE-FIRSTNAME = <FS_INSERT>-FIRSTNAME.
+   DB_ILN_ZVAL_TAEXPEOPLE-LASTNAME = <FS_INSERT>-LASTNAME.
 
 
-   DB_ILN_ZVAL_TAEXPEOPLE-UNAME = <FS_INSERT>-MV_UNAME.
+   DB_ILN_ZVAL_TAEXPEOPLE-UNAME = <FS_INSERT>-UNAME.
    append DB_ILN_ZVAL_TAEXPEOPLE to DB_ITB_ZVAL_TAEXPEOPLE.
 *>
 
@@ -1849,11 +1849,11 @@ endmethod.
 *< Generated from mapping:
 
 
-   DB_ULN_ZVAL_TAEXPEOPLE-FIRSTNAME = <FS_UPDATE>-MV_FIRSTNAME.
-   DB_ULN_ZVAL_TAEXPEOPLE-LASTNAME = <FS_UPDATE>-MV_LASTNAME.
+   DB_ULN_ZVAL_TAEXPEOPLE-FIRSTNAME = <FS_UPDATE>-FIRSTNAME.
+   DB_ULN_ZVAL_TAEXPEOPLE-LASTNAME = <FS_UPDATE>-LASTNAME.
 
 
-   DB_ULN_ZVAL_TAEXPEOPLE-UNAME = <FS_UPDATE>-MV_UNAME.
+   DB_ULN_ZVAL_TAEXPEOPLE-UNAME = <FS_UPDATE>-UNAME.
    append DB_ULN_ZVAL_TAEXPEOPLE TO DB_UTB_ZVAL_TAEXPEOPLE.
 *>
 
@@ -1862,7 +1862,7 @@ endmethod.
 * * Collect Deletes
   loop at I_DELETES assigning <FS_DELETE>.
 
-    DB_DLN_ZVAL_TAEXPEOPLE-UNAME = <FS_DELETE>-BUSINESS_KEY-MV_UNAME.
+    DB_DLN_ZVAL_TAEXPEOPLE-UNAME = <FS_DELETE>-BUSINESS_KEY-UNAME.
 
     append DB_DLN_ZVAL_TAEXPEOPLE TO DB_DTB_ZVAL_TAEXPEOPLE.
 
@@ -1930,7 +1930,7 @@ endmethod.
   data: COMP_STRING type STRING.
 
 *< Generated from mapping:
-  COMP_STRING = I_BUSINESS_KEY-MV_UNAME.
+  COMP_STRING = I_BUSINESS_KEY-UNAME.
   concatenate RESULT COMP_STRING into RESULT.
 *>
 
@@ -1974,9 +1974,9 @@ endmethod.
   THE_OBJECT = I_OBJECT_REF.
 
 *<  Generated from mapping:
-  THE_OBJECT->MV_UNAME = I_OBJECT_DATA-MV_UNAME.
-  THE_OBJECT->MV_FIRSTNAME = I_OBJECT_DATA-MV_FIRSTNAME.
-  THE_OBJECT->MV_LASTNAME = I_OBJECT_DATA-MV_LASTNAME.
+  THE_OBJECT->UNAME = I_OBJECT_DATA-UNAME.
+  THE_OBJECT->FIRSTNAME = I_OBJECT_DATA-FIRSTNAME.
+  THE_OBJECT->LASTNAME = I_OBJECT_DATA-LASTNAME.
 *>
 
            "MAP_SET_ATTRIBUTES
@@ -2243,7 +2243,7 @@ endmethod.
   create object NEW_OBJECT.
 
 * < Generated from mapping:
-  NEW_OBJECT->MV_UNAME = I_BUSINESS_KEY-MV_UNAME.
+  NEW_OBJECT->UNAME = I_BUSINESS_KEY-UNAME.
 * >
 
 * * 2. Get internal OID for the new object and set CURRENT_SPECIAL_OI
